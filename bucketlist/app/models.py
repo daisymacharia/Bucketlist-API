@@ -2,7 +2,8 @@ import os
 from app import db
 from passlib.apps import custom_app_context as pwd_context
 from sqlalchemy.ext.declarative import declarative_base
-
+from itsdangerous import (TimedJSONWebSignatureSerializer
+                          as Serializer, BadSignature, SignatureExpired)
 
 secret = os.getenv('SECRET')
 
@@ -27,7 +28,7 @@ class AddUpdateDelete():
 Base = declarative_base()
 
 
-class User(db.Model, AddUpdateDelete, Base):
+class User(db.Model, AddUpdateDelete):
     """Defines the user model"""
     __tablename__ = "users"
     user_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
@@ -44,7 +45,7 @@ class User(db.Model, AddUpdateDelete, Base):
     def __init__(self, username, email, password):
         self.username = username
         self.email = email
-        self.password = password
+        self.password_hash = password
 
         # Hash password
     def hash_password(self, password):
@@ -54,8 +55,25 @@ class User(db.Model, AddUpdateDelete, Base):
     def verify_password(self, password):
         return pwd_context.verify(password, self.password_hash)
 
+        # token default expiry time = 10 mim
+    def generate_auth_token(self, expiration=600):
+        s = Serializer(secret, expires_in=expiration)
+        return s.dumps({'id': self.user_id})
 
-class BucketListItems(db.Model, AddUpdateDelete, Base):
+    @staticmethod
+    def verify_auth_token(token):
+        s = Serializer(secret)
+        try:
+            data = s.loads(token)
+        except SignatureExpired:
+            return None  # valid token, but expired
+        except BadSignature:
+            return None  # invalid token
+        user = User.query.get(data['id'])
+        return user
+
+
+class BucketListItems(db.Model, AddUpdateDelete):
     """Defines the bucketlist item model"""
     __tablename__ = "bucketlistitems"
     item_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
@@ -72,7 +90,7 @@ class BucketListItems(db.Model, AddUpdateDelete, Base):
         self.bucketlist_id = bucketlist_id
 
 
-class BucketList(db.Model, AddUpdateDelete, Base):
+class BucketList(db.Model, AddUpdateDelete):
     """Defines the bucketlist model"""
     __tablename__ = "bucketlist"
     list_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
