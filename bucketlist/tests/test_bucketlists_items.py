@@ -43,14 +43,14 @@ class InitialTests(BaseTest):
         self.assertEqual(res.status_code, 201)
         result = self.client.get("/api/v1.0/bucketlists/items/1")
         self.assertEqual(result.status_code, 200)
-        self.assertIn("Test item", str(result.data))
+        self.assertIn("Go bunjee jumping", str(result.data))
 
     def get_bucketlists_items(self):
         res = self.bucketlistitem()
         self.assertEqual(res.status_code, 201)
         result = self.client.get("/api/v1.0/bucketlists/items/")
         self.assertEqual(result.status_code, 200)
-        self.assertIn("Test item", str(result.data))
+        self.assertIn("Go bunjee jumping", str(result.data))
 
     def get_non_existent_bucketlists_items(self):
         result = self.client.get("/api/v1.0/bucketlists/items/9")
