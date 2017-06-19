@@ -24,9 +24,11 @@ class BaseTest(unittest.TestCase):
         # create all tables
         self.database.drop_all()
         self.database.create_all()
-        self.new_bucketlist = {'name': 'Go bunjee jumping'}
-        self.new_bucketlistitem = {'name': 'Test item'}
-        self.user = {"email": "test@example.org", "password_hash": "test_pass"}
+        self.new_bucketlist = {'name': 'Fly in the air'}
+        self.new_bucketlistitem = {'name': 'Go bunjee jumping'}
+        self.new_user = {"email": "test@example.org",
+                         "username": "test_name",
+                         "password_hash": "test_pass"}
 
     def tearDown(self):
         """teardown all initialized variables."""
