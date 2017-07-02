@@ -24,5 +24,7 @@ def create_app(config_name):
     api = Api(app)
     api.add_resource(UserRegister, '/api/v1.0/auth/register',
                      endpoint='user_registration')
+    api.add_resource(UserLogin, '/api/v1.0/auth/login',
+                     endpoint='user_login')
 
     return app
