@@ -9,8 +9,28 @@ parent_dir = current_dir[:current_dir.rfind(os.path.sep)]
 sys.path.insert(0, parent_dir)
 from flask_restful import Resource, abort
 from flask import json, jsonify, request, g
+from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 from app.models import User, BucketListItems, BucketList
-from app.schema import UserRegisterSchema, UserLoginSchema
+from app.schema import UserRegisterSchema, UserLoginSchema, BucketListSchema
+
+auth = HTTPTokenAuth()
+
+
+@auth.verify_token
+# callback that Flask-HTTPAuth will use to verify the password for a
+# specific user
+def verify_user_token(token):
+    verified_user = User.verify_auth_token(token)
+    if type(verified_user) is not User:
+        return False
+    else:
+        g.user = verified_user
+        return True
+
+
+class AuthResource(Resource):
+    """"""
+    method_decorators = [auth.login_required]
 
 
 class UserRegister(Resource):
@@ -74,3 +94,30 @@ class UserLogin(Resource):
         else:
             response = jsonify({'Error': 'Wrong password', 'status': 400})
             return response
+
+
+class CreateBucketlist(AuthResource):
+    def post(self):
+        data = request.get_json()
+        if not data:
+            response = jsonify({'Error': 'No data provided for' +
+                                ' ' + 'bucketlist creation',
+                                'status': 400})
+            return response
+        bucketlist_schema = BucketListSchema()
+        errors = bucketlist_schema.validate(data)
+        if errors:
+            return errors
+        name = data['name']
+        existing_bucketlist = BucketList.query.filter_by(name=name, created_by=g.user.user_id).first()
+        # verify name is not already in use
+        if existing_bucketlist:
+            response = jsonify({'Error': 'Bucketlist already created',
+                                'status': 409})
+            return response
+        new_bucketlist_name = BucketList(name=name,
+                                         created_by=g.user.user_id)
+        new_bucketlist_name.add(new_bucketlist_name)
+        response = jsonify({'Message': 'Bucketlist created successfully',
+                            'status': 200})
+        return response
