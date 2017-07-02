@@ -10,7 +10,7 @@ sys.path.insert(0, parent_dir)
 from flask_restful import Resource, abort
 from flask import json, jsonify, request, g
 from app.models import User, BucketListItems, BucketList
-from app.schema import UserRegisterSchema
+from app.schema import UserRegisterSchema, UserLoginSchema
 
 
 class UserRegister(Resource):
@@ -46,3 +46,31 @@ class UserRegister(Resource):
         new_user.hash_password(password)
         return jsonify({'message': 'User added successfully',
                         'status': 201})
+
+
+class UserLogin(Resource):
+    def post(self):
+        data = request.get_json()
+        if not data:
+            response = jsonify({'Error': 'No data provided for registration',
+                                'status': 400})
+            return response
+        user_login_schema = UserLoginSchema()
+        errors = user_login_schema.validate(data)
+        if errors:
+            return errors
+        email = data['email']
+        password = data['password']
+        email = User.query.filter_by(email=email).first()
+        if not email:
+            response = jsonify({'Error': 'Email not registered',
+                                'status': 400})
+            return response
+        if email.verify_password(password):
+            token = email.generate_auth_token()
+            response = jsonify({'message': 'Login successful', 'status': 200,
+                               'token': token.decode('ascii')})
+            return response
+        else:
+            response = jsonify({'Error': 'Wrong password', 'status': 400})
+            return response
