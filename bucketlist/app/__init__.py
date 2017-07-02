@@ -27,6 +27,7 @@ def create_app(config_name):
     api.add_resource(UserLogin, '/api/v1.0/auth/login',
                      endpoint='user_login')
     api.add_resource(CreateBucketlist, '/api/v1.0/bucketlists/',
+                     endpoint='bucketlists')
+    api.add_resource(CreateBucketlist, '/api/v1.0/bucketlists/<int:id>',
                      endpoint='bucketlist')
-
     return app
