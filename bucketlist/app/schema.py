@@ -14,3 +14,13 @@ class UserRegisterSchema(Schema):
     password = fields.String(validate=[validate.Length(min=5)],
                              required=True,
                              error_messages={"required": "Enter password"})
+
+
+class UserLoginSchema(Schema):
+
+    email = fields.Email(validate=[validate.Length(max=50)],
+                         required=True,
+                         error_messages={"required": "Enter email"})
+    password = fields.String(validate=[validate.Length(min=5)],
+                             required=True,
+                             error_messages={"required": "Enter password"})
