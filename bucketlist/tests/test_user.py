@@ -20,7 +20,9 @@ class InitialTests(unittest.TestCase):
 
         # new user Registration data
         new_user = {"fullnames": "Daisy Macharia",
-            "email": "test@example.org",   "password_hash": "test_pass", "confirm_password": "test_pass"}
+                    "email": "test@example.org",
+                    "password_hash": "test_pass",
+                    "confirm_password": "test_pass"}
         return self.client.post("/api/v1.0/auth/register", data=json.dumps
                                 (new_user),
                                 content_type="application/json")
@@ -58,7 +60,7 @@ class InitialTests(unittest.TestCase):
     def test_register_existing_user(self):
         self.register_user()
         res1 = self.register_user()
-        self.assertEqual(res1.status_code, 400)
+        self.assertEqual(res1.status_code, 409)
         self.assertIn('User already exists', str(res1.data))
 
     def test_register_user_with_missing_email(self):
@@ -86,7 +88,7 @@ class InitialTests(unittest.TestCase):
 
     def test_login_without_registering_user(self):
         res = self.login_user()
-        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.status_code, 403)
         self.assertIn('You are required to first register a new user',
                       str(res.data))
 

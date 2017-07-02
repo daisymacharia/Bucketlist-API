@@ -74,7 +74,7 @@ class BucketListItemsTests(unittest.TestCase):
     def test_create_existing_bucketlists_item(self):
         self.bucketlistitem()
         result = self.bucketlistitem()
-        self.assertEqual(result.status_code, 400)
+        self.assertEqual(result.status_code, 409)
 
     def test_create_items_with_empty_values(self):
         res = self.client.post("/api/v1.0/bucketlists/1/items",
@@ -111,7 +111,7 @@ class BucketListItemsTests(unittest.TestCase):
 
     def test_delete_non_existent_bucketlists_items(self):
         result = self.client.delete("/api/v1.0/bucketlists/1/items/9")
-        self.assertEqual(result.status_code, 400)
+        self.assertEqual(result.status_code, 404)
 
 
 if __name__ == "__main__":
