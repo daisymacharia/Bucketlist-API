@@ -37,10 +37,6 @@ class UserRegister(Resource):
     """user registration"""
     def post(self):
         data = request.get_json()
-        if not data:
-            response = jsonify({'Error': 'No data provided for registration',
-                                'status': 400})
-            return response
         user_register_schema = UserRegisterSchema()
         errors = user_register_schema.validate(data)
         if errors:
@@ -99,13 +95,8 @@ class UserLogin(Resource):
 class CreateBucketlist(AuthResource):
     def post(self):
         data = request.get_json()
-        if not data:
-            response = jsonify({'Error': 'No data provided for' +
-                                ' ' + 'bucketlist creation',
-                                'status': 400})
-            return response
-        bucketlist_schema = BucketListSchema()
-        errors = bucketlist_schema.validate(data)
+        bucketlist_create = BucketListSchema()
+        errors = bucketlist_create.validate(data)
         if errors:
             return errors
         name = data['name']
@@ -121,3 +112,21 @@ class CreateBucketlist(AuthResource):
         response = jsonify({'Message': 'Bucketlist created successfully',
                             'status': 200})
         return response
+
+    def put(self, id):
+        bucketlist = BucketList.query.filter_by(list_id=id).filter_by(created_by=g.user.user_id).first()
+        if not bucketlist:
+            response = jsonify({'Error': 'The bucketlist does not exist',
+                                'status': 404})
+            return response
+        data = request.get_json()
+        bucketlist_update = BucketListSchema()
+        validate_errors = bucketlist_update.validate(data)
+        if validate_errors:
+            return validate_errors
+        if data['name']:
+            bucketlist.name = data['name']
+            bucketlist.update()
+            response = jsonify({'Message': 'Successfully updated bucketlist',
+                                'status': 200})
+            return response
