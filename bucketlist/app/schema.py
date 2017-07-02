@@ -24,3 +24,12 @@ class UserLoginSchema(Schema):
     password = fields.String(validate=[validate.Length(min=5)],
                              required=True,
                              error_messages={"required": "Enter password"})
+
+
+class BucketListSchema(Schema):
+
+    name = fields.String(validate=[validate.Length(min=3),
+                         validate.Regexp(r"[a-zA-Z0-9_\- ]*$",
+                                         error="Invalid characters")],
+                         required=True,
+                         error_messages={"required": "Enter bucketlist name"})    
