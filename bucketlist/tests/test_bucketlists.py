@@ -1,6 +1,6 @@
 import unittest
 import json
-from setup import BaseTest
+from tests.setup import BaseTest
 
 
 class InitialTests(BaseTest):
