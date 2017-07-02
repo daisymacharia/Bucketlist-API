@@ -70,7 +70,7 @@ class User(db.Model, AddUpdateDelete):
     def generate_auth_token(self, expiration=600):
         # token default expiry time = 10 min
         s = Serializer(secret, expires_in=expiration)
-        return s.dumps({'user_id': self.user_id})
+        return s.dumps({'id': self.user_id})
 
     @staticmethod
     def verify_auth_token(token):
@@ -82,7 +82,7 @@ class User(db.Model, AddUpdateDelete):
             return 'Signature Expired. Try log in again'
         except BadSignature:
             return 'Invalid Token. Try log in again'  # invalid token
-        user = User.query.get(data['user_id'])
+        user = User.query.get(data['id'])
         return user
 
 
