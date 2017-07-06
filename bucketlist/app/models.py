@@ -122,3 +122,7 @@ class BucketList(db.Model, AddUpdateDelete):
     def __init__(self, name, created_by):
         self.name = name
         self.created_by = created_by
+
+    @staticmethod
+    def get_all():
+        return BucketList.query.all()

@@ -8,12 +8,14 @@ parent_dir = current_dir[:current_dir.rfind(os.path.sep)]
 
 sys.path.insert(0, parent_dir)
 from flask_restful import Resource, abort
-from flask import json, jsonify, request, g
+from flask import json, jsonify, request, g, Flask
 from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 from app.models import User, BucketListItems, BucketList
+from instance.config import POSTS_PER_PAGE
 from app.schema import UserRegisterSchema, UserLoginSchema, BucketListSchema
 
 auth = HTTPTokenAuth()
+app = Flask(__name__)
 
 
 @auth.verify_token
@@ -100,7 +102,8 @@ class CreateBucketlist(AuthResource):
         if errors:
             return errors
         name = data['name']
-        existing_bucketlist = BucketList.query.filter_by(name=name, created_by=g.user.user_id).first()
+        existing_bucketlist = BucketList.query.filter_by(
+            name=name, created_by=g.user.user_id).first()
         # verify name is not already in use
         if existing_bucketlist:
             response = jsonify({'Error': 'Bucketlist already created',
@@ -114,7 +117,8 @@ class CreateBucketlist(AuthResource):
         return response
 
     def put(self, id):
-        bucketlist = BucketList.query.filter_by(list_id=id).filter_by(created_by=g.user.user_id).first()
+        bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
+            created_by=g.user.user_id).first()
         if not bucketlist:
             response = jsonify({'Error': 'The bucketlist does not exist',
                                 'status': 404})
@@ -124,9 +128,42 @@ class CreateBucketlist(AuthResource):
         validate_errors = bucketlist_update.validate(data)
         if validate_errors:
             return validate_errors
-        if data['name']:
-            bucketlist.name = data['name']
-            bucketlist.update()
-            response = jsonify({'Message': 'Successfully updated bucketlist',
-                                'status': 200})
+        name = data['name']
+        if name:
+            existing_name = BucketList.query.filter_by(name=name).filter_by(
+                created_by=g.user.user_id).first
+            if existing_name:
+                response = jsonify(
+                    {'Error': 'Updating with same data not allowed',
+                     'status': 409})
+                return response
+            else:
+                bucketlist.name = data['name']
+                bucketlist.update()
+                response = jsonify(
+                    {'Message': 'Successfully updated bucketlist',
+                     'status': 200})
+                return response
+
+    def get(self):
+        bucketlist = BucketList.query.filter_by(created_by=g.user.user_id)
+        if not bucketlist:
+            response = jsonify({'Message': 'The user has no bucketlists',
+                                'status': 404})
             return response
+        bucketlist_get = BucketListSchema()
+        return bucketlist_get.dump(bucketlist)
+
+
+class BucketlistResource(AuthResource):
+
+    def get(self, id):
+        bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
+            created_by=g.user.user_id).first()
+        if not bucketlist:
+            response = jsonify({'Error': 'The bucketlist does not exist',
+                                'status': 404})
+            return response
+        bucketlist_get = BucketListSchema()
+
+        return bucketlist_get.dump(bucketlist)

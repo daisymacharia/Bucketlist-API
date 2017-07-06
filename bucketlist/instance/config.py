@@ -24,3 +24,5 @@ app_config = {
     'development': DevelopmentConfig,
     'testing': TestingConfig,
 }
+# pagination
+POSTS_PER_PAGE = 3

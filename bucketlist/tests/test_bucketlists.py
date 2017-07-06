@@ -45,7 +45,7 @@ class InitialTests(BaseTest):
         """Test can update a bucketlists details"""
         self.bucketlist()
         result = self.client.put('/api/v1.0/bucketlists/1', data=json.dumps({
-                "name": "Jump from a plane"}))
+            "name": "Jump from a plane"}))
         self.assertEqual(result.status_code, 200)
         result = self.client.get('/bucketlists/v1.0/')
         self.assertIn("Jump from a plane", str(result.data))
@@ -53,7 +53,7 @@ class InitialTests(BaseTest):
     def test_update_non_existent_bucketlists(self):
         """Test cannot update a non existent bucketlist"""
         result = self.client.put('/api/v1.0/bucketlists/9', data=json.dumps({
-                "name": "Jump from a plane"}))
+            "name": "Jump from a plane"}))
         self.assertEqual(result.status_code, 404)
         self.assertIn("Bucketlist not found", str(result.data))
 
