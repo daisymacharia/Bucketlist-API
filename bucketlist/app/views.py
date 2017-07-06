@@ -116,35 +116,6 @@ class CreateBucketlist(AuthResource):
                             'status': 200})
         return response
 
-    def put(self, id):
-        bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
-            created_by=g.user.user_id).first()
-        if not bucketlist:
-            response = jsonify({'Error': 'The bucketlist does not exist',
-                                'status': 404})
-            return response
-        data = request.get_json()
-        bucketlist_update = BucketListSchema()
-        validate_errors = bucketlist_update.validate(data)
-        if validate_errors:
-            return validate_errors
-        name = data['name']
-        if name:
-            existing_name = BucketList.query.filter_by(name=name).filter_by(
-                created_by=g.user.user_id).first
-            if existing_name:
-                response = jsonify(
-                    {'Error': 'Updating with same data not allowed',
-                     'status': 409})
-                return response
-            else:
-                bucketlist.name = data['name']
-                bucketlist.update()
-                response = jsonify(
-                    {'Message': 'Successfully updated bucketlist',
-                     'status': 200})
-                return response
-
     def get(self):
         bucketlist = BucketList.query.filter_by(created_by=g.user.user_id)
         if not bucketlist:
@@ -167,3 +138,43 @@ class BucketlistResource(AuthResource):
         bucketlist_get = BucketListSchema()
 
         return bucketlist_get.dump(bucketlist)
+
+    def put(self, id):
+        bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
+            created_by=g.user.user_id).first()
+        if not bucketlist:
+            response = jsonify({'Error': 'The bucketlist does not exist',
+                                'status': 404})
+            return response
+        data = request.get_json()
+        bucketlist_update = BucketListSchema()
+        validate_errors = bucketlist_update.validate(data)
+        if validate_errors:
+            return validate_errors
+        name = data['name']
+        existing_name = BucketList.query.filter_by(name=name).filter_by(
+            created_by=g.user.user_id).first()
+        if existing_name:
+            response = jsonify(
+                {'Error': 'Updating with same data not allowed',
+                 'status': 409})
+            return response
+        bucketlist.name = data['name']
+        bucketlist.update()
+        response = jsonify(
+            {'Message': 'Successfully updated bucketlist',
+             'status': 200})
+        return response
+
+    def delete(self, id):
+        bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
+            created_by=g.user.user_id).first()
+        if not bucketlist:
+            response = jsonify({'Error': 'The bucketlist does not exist',
+                                'status': 404})
+            return response
+        bucketlist.delete(bucketlist)
+        response = jsonify(
+            {'Message': 'Successfully deleted bucketlist {}'.format(bucketlist.name),
+             'status': 200})
+        return response
