@@ -12,7 +12,8 @@ from flask import json, jsonify, request, g, Flask
 from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 from app.models import User, BucketListItems, BucketList
 from instance.config import POSTS_PER_PAGE
-from app.schema import UserRegisterSchema, UserLoginSchema, BucketListSchema
+from app.schema import UserRegisterSchema, UserLoginSchema, BucketListSchema,\
+    ItemsSchema
 
 auth = HTTPTokenAuth()
 app = Flask(__name__)
@@ -22,6 +23,8 @@ app = Flask(__name__)
 # callback that Flask-HTTPAuth will use to verify the password for a
 # specific user
 def verify_user_token(token):
+    """ function that verifies that the user accessing the private
+        endpoints is an athenticated user"""
     verified_user = User.verify_auth_token(token)
     if type(verified_user) is not User:
         return False
@@ -74,6 +77,7 @@ class UserLogin(Resource):
                                 'status': 400})
             return response
         user_login_schema = UserLoginSchema()
+        # validate data fetched
         errors = user_login_schema.validate(data)
         if errors:
             return errors
@@ -112,22 +116,24 @@ class CreateBucketlist(AuthResource):
         new_bucketlist_name = BucketList(name=name,
                                          created_by=g.user.user_id)
         new_bucketlist_name.add(new_bucketlist_name)
-        response = jsonify({'Message': 'Bucketlist created successfully',
+        response = jsonify({'Message': 'Bucketlist {} created successfully'
+                            .format(new_bucketlist_name.list_id),
                             'status': 200})
         return response
 
     def get(self):
-        bucketlist = BucketList.query.filter_by(created_by=g.user.user_id)
+        bucketlist = BucketList.query.filter_by(
+            created_by=g.user.user_id).all()
         if not bucketlist:
             response = jsonify({'Message': 'The user has no bucketlists',
                                 'status': 404})
             return response
+            # deserialize the data before returning it
         bucketlist_get = BucketListSchema()
-        return bucketlist_get.dump(bucketlist)
+        return bucketlist_get.dump(bucketlist, many=True).data
 
 
 class BucketlistResource(AuthResource):
-
     def get(self, id):
         bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
             created_by=g.user.user_id).first()
@@ -136,7 +142,7 @@ class BucketlistResource(AuthResource):
                                 'status': 404})
             return response
         bucketlist_get = BucketListSchema()
-
+        # return serialized data in json
         return bucketlist_get.dump(bucketlist)
 
     def put(self, id):
@@ -175,6 +181,30 @@ class BucketlistResource(AuthResource):
             return response
         bucketlist.delete(bucketlist)
         response = jsonify(
-            {'Message': 'Successfully deleted bucketlist {}'.format(bucketlist.name),
+            {'Message': 'Successfully deleted bucketlist {}'.format(
+                bucketlist.name),
              'status': 200})
         return response
+
+
+class BucketlistItems(AuthResource):
+    def post(self, id):
+        data = request.get_json()
+        item_create = ItemsSchema()
+        errors = item_create.validate(data)
+        if errors:
+            return errors
+        name = data['name']
+        existing_item = BucketListItems.query.filter_by(
+            name=name, bucketlist_id=id).first()
+        # verify name is not already in use
+        if existing_item:
+            response = jsonify({'Error': 'Item already created',
+                                'status': 409})
+            return response
+        new_item = BucketListItems(name=name, bucketlist_id=id)
+        new_item.add(new_item)
+        response = jsonify({'Message': 'Item {} created successfully'.format(
+            new_item.name), 'status': 200})
+        return response
+        print(item_create.dump(new_item))
