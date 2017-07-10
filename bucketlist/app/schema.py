@@ -35,7 +35,7 @@ class BucketListSchema(Schema):
                                          error="Invalid characters")],
                          required=True,
                          error_messages={"required": "Enter bucketlist name"})
-    items = fields.Nested('ItemsSchema')
+    items = fields.Nested('ItemsSchema', dump_only=True, many=True)
     date_created = fields.DateTime()
     date_modified = fields.DateTime()
     created_by = fields.Integer()
