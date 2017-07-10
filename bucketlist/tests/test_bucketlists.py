@@ -14,7 +14,8 @@ class InitialTests(BaseTest):
         """Test can create a bucketlist (POST request)"""
         res = self.bucketlist()
         self.assertEqual(res.status_code, 201)
-        self.assertIn('Fly in the air', str(res.data))
+        self.assertIn("Message": "Bucketlist created successfully",
+                      str(res.data))
 
     def test_create_existing_bucketlists(self):
         """Test cannot create a bucketlist that already exists"""

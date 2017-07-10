@@ -63,7 +63,7 @@ class BucketListItemsTests(unittest.TestCase):
             Create a bucketlist item
         """
 
-        return self.client.post("/api/v1.0/bucketlists/1/items",
+        return self.client.post("/api/v1.0/bucketlists/1/items/",
                                 data=self.new_bucketlistitem)
 
     def test_create_bucket_list_item(self):
@@ -77,7 +77,7 @@ class BucketListItemsTests(unittest.TestCase):
         self.assertEqual(result.status_code, 409)
 
     def test_create_items_with_empty_values(self):
-        res = self.client.post("/api/v1.0/bucketlists/1/items",
+        res = self.client.post("/api/v1.0/bucketlists/1/items/",
                                data=json.dumps({"name": " "}))
         self.assertEqual(res.status_code, 400)
 
@@ -96,7 +96,7 @@ class BucketListItemsTests(unittest.TestCase):
 
     def get_bucketlists_items(self):
         self.bucketlistitem()
-        result = self.client.get("/api/v1.0/bucketlists/1/items")
+        result = self.client.get("/api/v1.0/bucketlists/1/items/")
         self.assertEqual(result.status_code, 200)
         self.assertIn("Test item", str(result.data))
 
