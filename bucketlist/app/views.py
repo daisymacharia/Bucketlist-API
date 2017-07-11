@@ -139,10 +139,9 @@ class CreateBucketlist(AuthResource):
             #     response = jsonify({'Message': 'The user has no bucketlists',
             #                         'status': 404})
             #     return response
-            #     # deserialize the data before returning it
+            #     # serialize the data before returning it
         page = request.args.get("page", default=1, type=int)
         limit = request.args.get("limit", default=20, type=int)
-        # import pdb; pdb.set_trace()
         search = request.args.get("q", type=str)
         if search:
             bucketlists = BucketList.query.filter(
@@ -174,13 +173,6 @@ class CreateBucketlist(AuthResource):
         result.append(response)
         result.append(meta_data)
         return (jsonify(result))
-
-
-
-
-
-
-
 
     def put(self, id):
         bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
@@ -256,26 +248,77 @@ class BucketlistItems(AuthResource):
 
         bucketlist_creator = BucketList.query.filter_by(
             created_by=g.user.user_id).filter_by(list_id=id)
+        item_update = ItemsSchema()
+        data = request.get_json()
+        validate_errors = item_update.validate(data, partial=True)
+        if validate_errors:
+            return validate_errors
         if bucketlist_creator:
             item = BucketListItems.query.filter_by(
                 bucketlist_id=id).filter_by(item_id=item_id).first()
             if item:
-                data = request.get_json()
-                item_update = ItemsSchema()
-                errors = item_update.validate(data)
-                if errors:
-                    return jsonify({'error': 'Check your fields and try again',
-                                    'status': 400})
                 if 'done' in data:
                     done = data['done']
                     item.done = done
-                new_name = data['name']
-                item.name = new_name
+                elif 'name' in data:
+                    name = data['name']
+                    item.name = name
                 item.update()
                 return jsonify({'message': 'Successfully updated item',
                                 'status': 200})
-            return jsonify({'error': 'Item not found',
-                            'status': 400})
+            else:
+                return jsonify({'error': 'Item not found',
+                                'status': 400})
         return jsonify({'error': 'Unauthorized access',
                         'status': 401})
-                    
+
+    def get(self, id, item_id=None):
+        bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
+            created_by=g.user.user_id).first()
+        if bucketlist:
+            if item_id:
+                bucketlistitem = BucketListItems.query.filter_by(
+                    item_id=item_id).filter_by(
+                    bucketlist_id=id).first()
+                if not bucketlistitem:
+                    response = jsonify({'Error': 'The bucketlist item' + " " +
+                                        'does not exist', 'status': 404})
+                    return response
+                bucketlistitem_get = ItemsSchema()
+                # return serialized data in json
+                return bucketlistitem_get.dump(bucketlist)
+            page = request.args.get("page", default=1, type=int)
+            limit = request.args.get("limit", default=20, type=int)
+            search = request.args.get("q", type=str)
+            if search:
+                items = BucketListItems.query.filter(
+                    BucketListItems.bucketlist_id == id,
+                    BucketListItems.name.ilike('%' + search + '%'))\
+                    .paginate(page, limit, False)
+
+            else:
+                items = BucketListItems.query.filter_by(
+                    bucketlist_id=id).paginate(page, limit, False)
+            items_get_all = ItemsSchema()
+            if items.has_next:
+                next_page = request.url_root + 'api/v1.0/bucketlists' +\
+                    "/" + str(id) + '/items' + '?limit=' + str(limit) + \
+                    '&page=' + str(page + 1)
+            else:
+                next_page = 'None'
+            if items.has_prev:
+                prev_page = request.url_root + 'api/v1.0/bucketlists' +\
+                    "/" + str(id) + '/items' + '?limit=' + str(limit) + \
+                    '&page=' + str(page - 1)
+            else:
+                prev_page = 'None'
+            result = []
+            response = items_get_all.dump(items.items, many=True).data
+            meta_data = {'meta_data': {'next_page': next_page,
+                                       'previous_page': prev_page,
+                                       'total_pages': items.pages}}
+            result.append(response)
+            result.append(meta_data)
+            return (jsonify(result))
+        return jsonify({'error': 'Unauthorized access',
+                        'status': 401})
