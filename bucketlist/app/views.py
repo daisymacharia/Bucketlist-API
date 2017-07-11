@@ -65,8 +65,9 @@ class UserRegister(Resource):
         new_user = User(fullnames=fullnames, email=email, password=password)
         new_user.add(new_user)
         new_user.hash_password(password)
-        return jsonify({'message': 'User added successfully',
-                        'status': 201})
+        response = ({'message': 'User added successfully',
+                    'status': 201})
+        return response
 
 
 class UserLogin(Resource):
