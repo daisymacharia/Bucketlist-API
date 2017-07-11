@@ -121,29 +121,66 @@ class CreateBucketlist(AuthResource):
                             'status': 200})
         return response
 
-    def get(self):
-        bucketlist = BucketList.query.filter_by(
-            created_by=g.user.user_id).all()
-        if not bucketlist:
-            response = jsonify({'Message': 'The user has no bucketlists',
-                                'status': 404})
-            return response
-            # deserialize the data before returning it
-        bucketlist_get = BucketListSchema()
-        return bucketlist_get.dump(bucketlist, many=True).data
+    def get(self, id=None):
+        if id:
+            bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
+                created_by=g.user.user_id).first()
+            if not bucketlist:
+                response = jsonify({'Error': 'The bucketlist does not exist',
+                                    'status': 404})
+                return response
+            bucketlist_get = BucketListSchema()
+            # return serialized data in json
+            return bucketlist_get.dump(bucketlist)
+        # else:
+            # bucketlist = BucketList.query.filter_by(
+            #     created_by=g.user.user_id).all()
+            # if not bucketlist:
+            #     response = jsonify({'Message': 'The user has no bucketlists',
+            #                         'status': 404})
+            #     return response
+            #     # deserialize the data before returning it
+        page = request.args.get("page", default=1, type=int)
+        limit = request.args.get("limit", default=20, type=int)
+        # import pdb; pdb.set_trace()
+        search = request.args.get("q", type=str)
+        if search:
+            bucketlists = BucketList.query.filter(
+                BucketList.created_by == g.user.user_id,
+                BucketList.name.ilike('%' + search + '%'))\
+                .paginate(page, limit, False)
+
+        else:
+            bucketlists = BucketList.query.filter_by(
+                created_by=g.user.user_id).paginate(page, limit, False)
+        bucketlist_get_all = BucketListSchema()
+        if bucketlists.has_next:
+            next_page = request.url_root + 'api/v1.0/bucketlists' +\
+                '?limit=' + str(limit) + \
+                '&page=' + str(page + 1)
+        else:
+            next_page = 'None'
+        if bucketlists.has_prev:
+            prev_page = request.url_root + 'api/v1.0/bucketlists' +\
+                '?limit=' + str(limit) + \
+                '&page=' + str(page - 1)
+        else:
+            prev_page = 'None'
+        result = []
+        response = bucketlist_get_all.dump(bucketlists.items, many=True).data
+        meta_data = {'meta_data': {'next_page': next_page,
+                                   'previous_page': prev_page,
+                                   'total_pages': bucketlists.pages}}
+        result.append(response)
+        result.append(meta_data)
+        return (jsonify(result))
 
 
-class BucketlistResource(AuthResource):
-    def get(self, id):
-        bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
-            created_by=g.user.user_id).first()
-        if not bucketlist:
-            response = jsonify({'Error': 'The bucketlist does not exist',
-                                'status': 404})
-            return response
-        bucketlist_get = BucketListSchema()
-        # return serialized data in json
-        return bucketlist_get.dump(bucketlist)
+
+
+
+
+
 
     def put(self, id):
         bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
@@ -189,22 +226,56 @@ class BucketlistResource(AuthResource):
 
 class BucketlistItems(AuthResource):
     def post(self, id):
-        data = request.get_json()
-        item_create = ItemsSchema()
-        errors = item_create.validate(data)
-        if errors:
-            return errors
-        name = data['name']
-        existing_item = BucketListItems.query.filter_by(
-            name=name, bucketlist_id=id).first()
-        # verify name is not already in use
-        if existing_item:
-            response = jsonify({'Error': 'Item already created',
-                                'status': 409})
+        bucketlist_creator = BucketList.query.filter_by(
+            created_by=g.user.user_id).filter_by(list_id=id)
+        if bucketlist_creator:
+            data = request.get_json()
+            item_create = ItemsSchema()
+            errors = item_create.validate(data)
+            if errors:
+                return errors
+            name = data['name']
+            existing_item = BucketListItems.query.filter_by(
+                name=name, bucketlist_id=id).first()
+            # verify name is not already in use
+            if existing_item:
+                response = jsonify({'Error': 'Item already created',
+                                    'status': 409})
+                return response
+            new_item = BucketListItems(name=name, bucketlist_id=id)
+            new_item.add(new_item)
+            response = jsonify({'Message': 'Item {} created successfully'.format(
+                new_item.name), 'status': 200})
             return response
-        new_item = BucketListItems(name=name, bucketlist_id=id)
-        new_item.add(new_item)
-        response = jsonify({'Message': 'Item {} created successfully'.format(
-            new_item.name), 'status': 200})
-        return response
-        print(item_create.dump(new_item))
+        else:
+            return jsonify({'error': 'Unauthorized access',
+                            'status': 401})
+
+    def put(self, id, item_id):
+        # update a particular item for a specific bucketlist
+
+        bucketlist_creator = BucketList.query.filter_by(
+            created_by=g.user.user_id).filter_by(list_id=id)
+        if bucketlist_creator:
+            item = BucketListItems.query.filter_by(
+                bucketlist_id=id).filter_by(item_id=item_id).first()
+            if item:
+                data = request.get_json()
+                item_update = ItemsSchema()
+                errors = item_update.validate(data)
+                if errors:
+                    return jsonify({'error': 'Check your fields and try again',
+                                    'status': 400})
+                if 'done' in data:
+                    done = data['done']
+                    item.done = done
+                new_name = data['name']
+                item.name = new_name
+                item.update()
+                return jsonify({'message': 'Successfully updated item',
+                                'status': 200})
+            return jsonify({'error': 'Item not found',
+                            'status': 400})
+        return jsonify({'error': 'Unauthorized access',
+                        'status': 401})
+                    
