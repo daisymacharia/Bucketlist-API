@@ -322,3 +322,21 @@ class BucketlistItems(AuthResource):
             return (jsonify(result))
         return jsonify({'error': 'Unauthorized access',
                         'status': 401})
+
+    def delete(self, id, item_id):
+        bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
+            created_by=g.user.user_id).first()
+        if bucketlist:
+            bucketlistitem = BucketListItems.query.filter_by(
+                item_id=item_id).filter_by(
+                bucketlist_id=id).first()
+            if not bucketlistitem:
+                response = jsonify({'Error': 'The bucketlist item' + " " +
+                                    'does not exist', 'status': 404})
+                return response
+            bucketlistitem.delete(bucketlistitem)
+            response = jsonify(
+                {'Message': 'Successfully deleted bucketlist'
+                 " " + 'item {}'.format(bucketlistitem.name),
+                 'status': 200})
+            return response
