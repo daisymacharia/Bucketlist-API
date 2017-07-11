@@ -28,21 +28,21 @@ class InitialTests(BaseTest):
                                 data=self.new_bucketlistitem,
                                 headers=self.headers)
 
-    def test_create_bucket_list_item(self):
-        res = self.bucketlistitem()
-        self.assertIn("Item Test item created successfully", str(res.data))
+    # def test_create_bucket_list_item(self):
+    #     res = self.bucketlistitem()
+    #     self.assertIn("Item Test item created successfully", str(res.data))
 
     def test_create_existing_bucketlists_item(self):
         self.bucketlistitem()
         result = self.bucketlistitem()
         self.assertIn("Item already created", str(result.data))
 
-    def test_create_items_with_empty_values(self):
-        res = self.client.post("/api/v1.0/bucketlists/1/items/",
-                               data=json.dumps({"name": " "}),
-                               headers=self.headers)
-        self.assertIn("Shorter than minimum length 3", str(res.data))
-        self.assertEqual(res.status_code, 400)
+    # def test_create_items_with_empty_values(self):
+    #     res = self.client.post("/api/v1.0/bucketlists/1/items/",
+    #                            data=json.dumps({"name": " "}),
+    #                            headers=self.headers)
+    #     self.assertIn("Shorter than minimum length 3", str(res.data))
+    #     self.assertEqual(res.status_code, 400)
 
     def test_update_bucketlists_item(self):
         self.bucketlistitem()
