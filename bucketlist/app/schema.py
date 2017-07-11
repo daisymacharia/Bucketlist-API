@@ -51,3 +51,4 @@ class ItemsSchema(Schema):
     date_created = fields.DateTime()
     date_modified = fields.DateTime()
     done = fields.Boolean()
+    
