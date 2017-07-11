@@ -1,0 +1,8 @@
+[run]
+
+#Ignore
+omit = *click*, *flask*, *flask_api*,*itsdangerous*,*jinja2*,*markupsafe*,*psycopg2*,*sqlalchemy*,*werkzeug*,*asyncio*,*concurrent*,*ctypes*,*encodings*,*hmac*,*html*,*http*,*mimetypes*,*multiprocessing*,*uuid*,*numbers*,*pydoc*,*stringprep*,*decimal*,*mimetools*,*rfc822*,*urllib2*,*bisect*,*_MozillaCookieJar*,*_LWPCookieJar*,*cookielib*,
+[report]
+omit =
+    */python?.?/*
+    */site-packages/nose/*
