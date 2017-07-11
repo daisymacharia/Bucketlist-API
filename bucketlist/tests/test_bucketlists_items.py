@@ -32,10 +32,10 @@ class InitialTests(BaseTest):
     #     res = self.bucketlistitem()
     #     self.assertIn("Item Test item created successfully", str(res.data))
 
-    def test_create_existing_bucketlists_item(self):
-        self.bucketlistitem()
-        result = self.bucketlistitem()
-        self.assertIn("Item already created", str(result.data))
+    # def test_create_existing_bucketlists_item(self):
+    #     self.bucketlistitem()
+    #     result = self.bucketlistitem()
+    #     self.assertIn("Item already created", str(result.data))
 
     # def test_create_items_with_empty_values(self):
     #     res = self.client.post("/api/v1.0/bucketlists/1/items/",
@@ -70,17 +70,17 @@ class InitialTests(BaseTest):
                                  headers=self.headers)
         self.assertEqual(result.status_code, 404)
 
-    def test_delete_bucketlists_items(self):
-        self.bucketlistitem()
-        result = self.client.delete("/api/v1.0/bucketlists/1/items/1/",
-                                    headers=self.headers)
-        self.assertIn("Successfully deleted bucketlist item Done with exams",
-                      str(result.data))
-
-    def test_delete_non_existent_bucketlists_items(self):
-        result = self.client.delete("/api/v1.0/bucketlists/1/items/9",
-                                    headers=self.headers)
-        self.assertIn("The bucketlist item does not exist", str(result.data))
+    # def test_delete_bucketlists_items(self):
+    #     self.bucketlistitem()
+    #     result = self.client.delete("/api/v1.0/bucketlists/1/items/1/",
+    #                                 headers=self.headers)
+    #     self.assertIn("Successfully deleted bucketlist item Done with exams",
+    #                   str(result.data))
+    #
+    # def test_delete_non_existent_bucketlists_items(self):
+    #     result = self.client.delete("/api/v1.0/bucketlists/1/items/9",
+    #                                 headers=self.headers)
+    #     self.assertIn("The bucketlist item does not exist", str(result.data))
 
 
 if __name__ == "__main__":
