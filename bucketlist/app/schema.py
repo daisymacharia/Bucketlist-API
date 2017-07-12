@@ -1,9 +1,7 @@
 """ marshmallow schema with functions:
 1.Validate input data.
 2.Deserialize input data to app-level objects.
-3.Serialize app-level objects to primitive Python types.
-The serialized objects can then be rendered to standard
-formats such as JSON for use in an HTTP API. """
+3.Serialize app-level objects to primitive Python types. """
 from marshmallow import Schema, fields, validate
 
 

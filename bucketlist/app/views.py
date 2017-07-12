@@ -8,7 +8,7 @@ parent_dir = current_dir[:current_dir.rfind(os.path.sep)]
 
 sys.path.insert(0, parent_dir)
 from flask_restful import Resource, abort
-from flask import json, jsonify, request, g, Flask
+from flask import json, jsonify, request, g, Flask, make_response
 from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 from app.models import User, BucketListItems, BucketList
 from instance.config import POSTS_PER_PAGE
@@ -34,13 +34,16 @@ def verify_user_token(token):
 
 
 class AuthResource(Resource):
-    """"""
+    """subclass of flask_restful.Resource with auth.login_required.
+       All the methods declared in a resource that uses the AuthRequiredResource
+       will require authentication."""
     method_decorators = [auth.login_required]
 
 
 class UserRegister(Resource):
-    """user registration"""
+    """user registration: Allows the user to register a new account """
     def post(self):
+        """Allows the user to post data to the client for registration"""
         data = request.get_json()
         user_register_schema = UserRegisterSchema()
         errors = user_register_schema.validate(data)
@@ -71,7 +74,12 @@ class UserRegister(Resource):
 
 
 class UserLogin(Resource):
+    """   user login: Allows the user to login to an existing account and
+          generate an auth token that the user will use to access private
+          endpoints"""
+
     def post(self):
+        """Allows the user to post data to the client for login"""
         data = request.get_json()
         if not data:
             response = jsonify({'Error': 'No data provided for registration',
@@ -100,7 +108,14 @@ class UserLogin(Resource):
 
 
 class CreateBucketlist(AuthResource):
+    """Create bucketlist:
+       Allows the user to create a new bucketlist,
+       edit an existing bucketlist,
+       get bucketlist by id and all the
+       bucketlists by the logged in user,
+       delete a bucketlist"""
     def post(self):
+        """ POST method for creation of a new bucketlist"""
         data = request.get_json()
         bucketlist_create = BucketListSchema()
         errors = bucketlist_create.validate(data)
@@ -123,6 +138,9 @@ class CreateBucketlist(AuthResource):
         return response
 
     def get(self, id=None):
+        """GET method for getting a bucketlist by id,
+           getting all bucketlists,
+           Searching for bucketlist by name"""
         if id:
             bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
                 created_by=g.user.user_id).first()
@@ -133,14 +151,6 @@ class CreateBucketlist(AuthResource):
             bucketlist_get = BucketListSchema()
             # return serialized data in json
             return bucketlist_get.dump(bucketlist)
-        # else:
-            # bucketlist = BucketList.query.filter_by(
-            #     created_by=g.user.user_id).all()
-            # if not bucketlist:
-            #     response = jsonify({'Message': 'The user has no bucketlists',
-            #                         'status': 404})
-            #     return response
-            #     # serialize the data before returning it
         page = request.args.get("page", default=1, type=int)
         limit = request.args.get("limit", default=20, type=int)
         search = request.args.get("q", type=str)
@@ -176,6 +186,7 @@ class CreateBucketlist(AuthResource):
         return (jsonify(result))
 
     def put(self, id):
+        """PUT method for updating a bucketlist"""
         bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
             created_by=g.user.user_id).first()
         if not bucketlist:
@@ -192,17 +203,16 @@ class CreateBucketlist(AuthResource):
             created_by=g.user.user_id).first()
         if existing_name:
             response = jsonify(
-                {'Error': 'Updating with same data not allowed',
-                 'status': 409})
-            return response
+                {'Error': 'Updating with same data not allowed'})
+            return make_response(response, 409)
         bucketlist.name = data['name']
         bucketlist.update()
         response = jsonify(
-            {'Message': 'Successfully updated bucketlist',
-             'status': 200})
-        return response
+            {'Message': 'Successfully updated bucketlist'})
+        return make_response(response, 200)
 
     def delete(self, id):
+        """Delete method that deletes a specific bucketlist"""
         bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
             created_by=g.user.user_id).first()
         if not bucketlist:
@@ -218,7 +228,17 @@ class CreateBucketlist(AuthResource):
 
 
 class BucketlistItems(AuthResource):
+    """Bucketlistitems:
+       Allows the user to create a new bucketlist item,
+       edit an existing bucketlist item,
+       get items by id and all the
+       items by the logged in user,
+       delete a bucketlist item"""
+
     def post(self, id):
+        """POST method that allows the user to post dat for creation of a
+           new bucketlist item
+           Post data is validated and deserialized to json format"""
         bucketlist_creator = BucketList.query.filter_by(
             created_by=g.user.user_id).filter_by(list_id=id)
         if bucketlist_creator:
@@ -238,14 +258,15 @@ class BucketlistItems(AuthResource):
             new_item = BucketListItems(name=name, bucketlist_id=id)
             new_item.add(new_item)
             response = jsonify({'Message': 'Item {} created successfully'.format(
-                new_item.name), 'status': 200})
-            return response
+                new_item.name)})
+            return make_response(response, 201)
         else:
             return jsonify({'error': 'Unauthorized access',
                             'status': 401})
 
     def put(self, id, item_id):
-        # update a particular item for a specific bucketlist
+        """PUT method that allows the user to edit an existing
+           bucketlist item"""
 
         bucketlist_creator = BucketList.query.filter_by(
             created_by=g.user.user_id).filter_by(list_id=id)
@@ -274,6 +295,9 @@ class BucketlistItems(AuthResource):
                         'status': 401})
 
     def get(self, id, item_id=None):
+        """GET method for getting a bucketlist item by id,
+           getting all bucketlists items,
+           Searching for bucketlist items by name"""
         bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
             created_by=g.user.user_id).first()
         if bucketlist:
@@ -325,6 +349,7 @@ class BucketlistItems(AuthResource):
                         'status': 401})
 
     def delete(self, id, item_id):
+        """Delete method that deletes a specific bucketlist"""
         bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
             created_by=g.user.user_id).first()
         if bucketlist:
@@ -341,3 +366,6 @@ class BucketlistItems(AuthResource):
                  " " + 'item {}'.format(bucketlistitem.name),
                  'status': 200})
             return response
+        else:
+            return jsonify({'Message': 'Bucketlist not found',
+                            'status': 404})
