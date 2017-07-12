@@ -22,7 +22,7 @@ app = Flask(__name__)
 # callback that Flask-HTTPAuth will use to verify the password for a
 # specific user
 def verify_user_token(token):
-    """ function that verifies that the user accessing the private
+    """function that verifies that the user accessing the private
         endpoints is an athenticated user"""
     verified_user = User.verify_auth_token(token)
     if type(verified_user) is not User:
@@ -283,6 +283,11 @@ class BucketlistItems(AuthResource):
                     item.done = done
                 elif 'name' in data:
                     name = data['name']
+                    existing_name = BucketListItems.query.filter_by(name=name).first()
+                    if existing_name:
+                        response = jsonify(
+                            {'Error': 'Updating with same data not allowed'})
+                        return make_response(response, 409)
                     item.name = name
                 item.update()
                 return jsonify({'message': 'Successfully updated item',

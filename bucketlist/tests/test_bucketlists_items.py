@@ -47,6 +47,14 @@ class InitialTests(BaseTest):
         self.assertIn("Shorter than minimum length 3", str(res.data))
         # self.assertEqual(res.status_code, 400)
 
+    def test_update_bucketlist_with_same_name(self):
+        """Test cannot update a bucketlist with same data"""
+        self.bucketlistitem()
+        result = self.client.put('/api/v1.0/bucketlists/1/items/1',
+                                 data=json.dumps({"name": "Test item"}),
+                                 headers=self.headers)
+        self.assertIn("Updating with same data not allowed", str(result.data))
+
     def test_update_bucketlists_item(self):
         self.bucketlistitem()
         second_bucketlist = {"name": "sky diving"}

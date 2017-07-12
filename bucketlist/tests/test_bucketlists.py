@@ -91,6 +91,21 @@ class InitialTests(BaseTest):
                                     headers=self.headers)
         self.assertIn('The bucketlist does not exist', str(result.data))
 
+    def test_search_bucketlist_using_name(self):
+        """ Test that a bucketlist can be searched using
+            the bucketlist's name"""
+        self.bucketlist()
+        result = self.client.get('/api/v1.0/bucketlists/?q=Jumping',
+                                 headers=self.headers)
+        self.assertIn('Go bunjee jumping', str(result.data))
+
+    def test_pagination(self):
+        """ Test that output from get method can be paginated """
+        self.bucketlist()
+        result = self.client.get('/api/v1.0/bucketlists/?limit=1',
+                                 headers=self.headers)
+        self.assertIn('"total_pages": 1', str(result.data))
+
 
 if __name__ == "__main__":
     unittest.main()
