@@ -7,11 +7,10 @@ current_dir = os.path.dirname(current_path)
 parent_dir = current_dir[:current_dir.rfind(os.path.sep)]
 
 sys.path.insert(0, parent_dir)
-from flask_restful import Resource, abort
-from flask import json, jsonify, request, g, Flask, make_response
+from flask_restful import Resource
+from flask import jsonify, request, g, Flask, make_response
 from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 from app.models import User, BucketListItems, BucketList
-from instance.config import POSTS_PER_PAGE
 from app.schema import UserRegisterSchema, UserLoginSchema, BucketListSchema,\
     ItemsSchema
 

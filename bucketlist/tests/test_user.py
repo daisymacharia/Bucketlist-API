@@ -66,11 +66,20 @@ class InitialTests(unittest.TestCase):
 
     def test_register_user_with_missing_email(self):
         """Test that register is not successful with missing fields"""
-        test_blank = {"email": " ", "fullnames": "test blank",
+        test_blank = {"fullnames": "test blank",
                       "password": "test_pass"}
         res1 = self.client.post("/api/v1.0/auth/register", data=json.dumps(
                                 test_blank), content_type="application/json")
-        self.assertIn('Not a valid email address', str(res1.data))
+        self.assertIn('Enter email', str(res1.data))
+
+    def test_register_user_with_mismatching_passwords(self):
+        """Test that register is not successful with mismatched passwords"""
+        test_blank = {"email": "test@example.org", "fullnames": "test blank",
+                      "password": "test_pass",
+                      "confirm_password": "test_mismatch"}
+        res1 = self.client.post("/api/v1.0/auth/register", data=json.dumps(
+                                test_blank), content_type="application/json")
+        self.assertIn('Passwords do not match', str(res1.data))
 
     def test_login_user(self):
         """ Test a registered user is logged in successfully"""

@@ -23,6 +23,12 @@ class InitialTests(BaseTest):
         self.assertIn("Bucketlist already created",
                       str(res1.data))
 
+    def test_create_bucketlist_with_empty_values(self):
+        res = self.client.post("/api/v1.0/bucketlists/",
+                               data=json.dumps({"name": " "}),
+                               headers=self.headers)
+        self.assertIn("Shorter than minimum length 3", str(res.data))
+
     def test_get_all_bucketlists(self):
         """Test can get all the bucketlists in the database"""
         self.bucketlist()
@@ -62,6 +68,14 @@ class InitialTests(BaseTest):
                                  data=json.dumps({"name": "Jump from a plane"}),
                                  headers=self.headers)
         self.assertIn("The bucketlist does not exist", str(result.data))
+
+    def test_update_bucketlist_with_same_name(self):
+        """Test cannot update a bucketlist with same data"""
+        self.bucketlist()
+        result = self.client.put('/api/v1.0/bucketlists/1/',
+                                 data=json.dumps({"name": "Go bunjee jumping"}),
+                                 headers=self.headers)
+        self.assertIn("Updating with same data not allowed", str(result.data))
 
     def test_delete__bucketlists(self):
         """Test that a bucketlist can be deleted"""
