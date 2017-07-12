@@ -19,12 +19,12 @@ class InitialTests(unittest.TestCase):
         """Registers new users to the system"""
 
         # new user Registration data
-        new_user = {"fullnames": "Daisy Macharia",
-                    "email": "test@example.org",
-                    "password": "test_pass",
-                    "confirm_password": "test_pass"}
+        self.new_user = {"fullnames": "Daisy Macharia",
+                         "email": "test@example.org",
+                         "password": "test_pass",
+                         "confirm_password": "test_pass"}
         return self.client.post("/api/v1.0/auth/register", data=json.dumps
-                                (new_user),
+                                (self.new_user),
                                 content_type="application/json")
 
     def login_user(self):
@@ -53,16 +53,19 @@ class InitialTests(unittest.TestCase):
             db.drop_all()
 
     def test_register_user(self):
+        """Test that a new user is registered successfully"""
         res = self.register_user()
         self.assertIn('User added successfully', str(res.data))
 
     def test_register_existing_user(self):
+        """ Test that an already registered user cannot be reregistered"""
         self.register_user()
         res1 = self.register_user()
         # self.assertEqual(res1.status, 409)
         self.assertIn('Email already in use', str(res1.data))
 
     def test_register_user_with_missing_email(self):
+        """Test that register is not successful with missing fields"""
         test_blank = {"email": " ", "fullnames": "test blank",
                       "password": "test_pass"}
         res1 = self.client.post("/api/v1.0/auth/register", data=json.dumps(
@@ -70,19 +73,23 @@ class InitialTests(unittest.TestCase):
         self.assertIn('Not a valid email address', str(res1.data))
 
     def test_login_user(self):
+        """ Test a registered user is logged in successfully"""
         self.register_user()
         res1 = self.login_user()
         self.assertIn('Login successful', str(res1.data))
 
-    # def test_login_wrong_credentials(self):
-    #     test_wrong_credentials = {"email": "test@example.org",
-    #                               "password": "test_wrong"}
-    #     self.register_user()
-    #     res1 = self.client.post("/api/v1.0/auth/login", data=json.dumps(
-    #                             test_wrong_credentials))
-    #     self.assertIn('Wrong password', str(res1.data))
+    def test_login_wrong_credentials(self):
+        """Test that login is unsuccessful with wrong credentials"""
+        test_wrong_credentials = {"email": "test@example.org",
+                                  "password": "test_wrong"}
+        self.register_user()
+        res1 = self.client.post("/api/v1.0/auth/login", data=json.dumps(
+                                test_wrong_credentials),
+                                content_type="application/json")
+        self.assertIn('Wrong password', str(res1.data))
 
     def test_login_without_registering_user(self):
+        """Test that a non registered user cannot login"""
         res = self.login_user()
         self.assertIn('Email not registered',
                       str(res.data))
