@@ -51,7 +51,7 @@ class ItemsSchema(Schema):
                          validate.Regexp(r"[a-zA-Z0-9_\- ]*$",
                                          error="Invalid characters")],
                          required=True,
-                         error_messages={"required": "Enter bucketlist name"})
+                         error_messages={"required": "Enter item name"})
     date_created = fields.DateTime()
     date_modified = fields.DateTime()
     done = fields.Boolean()

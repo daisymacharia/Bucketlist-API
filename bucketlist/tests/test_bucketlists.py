@@ -29,6 +29,12 @@ class InitialTests(BaseTest):
                                headers=self.headers)
         self.assertIn("Shorter than minimum length 3", str(res.data))
 
+    def test_create_bucketlist_with_no_name(self):
+        res = self.client.post("/api/v1.0/bucketlists/",
+                               data=json.dumps({}),
+                               headers=self.headers)
+        self.assertIn("Enter bucketlist name", str(res.data))
+
     def test_get_all_bucketlists(self):
         """Test can get all the bucketlists in the database"""
         self.bucketlist()
