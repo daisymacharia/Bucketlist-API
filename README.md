@@ -1,7 +1,6 @@
 [![Build Status](https://travis-ci.org/daisymacharia/Bucketlist-API.svg?branch=ft-functionality-148194901)](https://travis-ci.org/daisymacharia/Bucketlist-API)
-[![Coverage Status](https://coveralls.io/repos/github/daisymacharia/Bucketlist-API/badge.svg?branch=ft-functionality-148194901)](https://coveralls.io/github/daisymacharia/Bucketlist-API?branch=ft-functionality-148194901)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/142345aea68a42008ae3a7ee5fd63e9f)](https://www.codacy.com/app/daisymacharia/Bucketlist-API?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=daisymacharia/Bucketlist-API&amp;utm_campaign=Badge_Grade)
-
+[![Coverage Status](https://coveralls.io/repos/github/daisymacharia/Bucketlist-API/badge.svg?branch=ft-functionality-148194901)](https://coveralls.io/github/daisymacharia/Bucketlist-API?branch=ft-functionality-148194901)
 # Bucketlist-API
 
 Online Bucket List service using Flask.(RESTful API)
