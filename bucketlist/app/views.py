@@ -9,7 +9,7 @@ parent_dir = current_dir[:current_dir.rfind(os.path.sep)]
 sys.path.insert(0, parent_dir)
 from flask_restful import Resource
 from flask import jsonify, request, g, Flask, make_response
-from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
+from flask_httpauth import HTTPTokenAuth
 from app.models import User, BucketListItems, BucketList
 from app.schema import UserRegisterSchema, UserLoginSchema, BucketListSchema,\
     ItemsSchema
@@ -34,8 +34,8 @@ def verify_user_token(token):
 
 class AuthResource(Resource):
     """subclass of flask_restful.Resource with auth.login_required.
-       All the methods declared in a resource that uses the AuthRequiredResource
-       will require authentication."""
+       All the methods declared in a resource that uses the
+       AuthRequiredResource will require authentication."""
     method_decorators = [auth.login_required]
 
 
@@ -256,8 +256,8 @@ class BucketlistItems(AuthResource):
                 return response
             new_item = BucketListItems(name=name, bucketlist_id=id)
             new_item.add(new_item)
-            response = jsonify({'Message': 'Item {} created successfully'.format(
-                new_item.name)})
+            response = jsonify({'Message': 'Item {} created successfully'
+                               .format(new_item.name)})
             return make_response(response, 201)
         else:
             return jsonify({'error': 'Unauthorized access',
@@ -283,7 +283,8 @@ class BucketlistItems(AuthResource):
                     item.done = done
                 elif 'name' in data:
                     name = data['name']
-                    existing_name = BucketListItems.query.filter_by(name=name).first()
+                    existing_name = BucketListItems.query.filter_by(
+                        name=name).first()
                     if existing_name:
                         response = jsonify(
                             {'Error': 'Updating with same data not allowed'})
@@ -307,15 +308,14 @@ class BucketlistItems(AuthResource):
         if bucketlist:
             if item_id:
                 bucketlistitem = BucketListItems.query.filter_by(
-                    item_id=item_id).filter_by(
-                    bucketlist_id=id).first()
+                    item_id=item_id).filter_by(bucketlist_id=id)
                 if not bucketlistitem:
                     response = jsonify({'Error': 'The bucketlist item' + " " +
                                         'does not exist', 'status': 404})
                     return response
                 bucketlistitem_get = ItemsSchema()
                 # return serialized data in json
-                return bucketlistitem_get.dump(bucketlist)
+                return bucketlistitem_get.dump(bucketlistitem, many=True).data
             page = request.args.get("page", default=1, type=int)
             limit = request.args.get("limit", default=20, type=int)
             search = request.args.get("q", type=str)
