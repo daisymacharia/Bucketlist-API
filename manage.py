@@ -11,5 +11,18 @@ manager = Manager(app)
 
 manager.add_command('db', MigrateCommand)
 
+
+@manager.command
+def initdb():
+        db.create_all()
+        print('All tables created.')
+
+
+@manager.command
+def dropdb():
+        db.drop_all()
+        print('All tables deleted.')
+
+
 if __name__ == '__main__':
     manager.run()
