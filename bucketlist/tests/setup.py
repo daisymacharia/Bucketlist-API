@@ -29,23 +29,25 @@ class BaseTest(unittest.TestCase):
         self.client = self.app.test_client()
 
         # new user Registration data
-        self.new_user = {"fullnames": "Daisy Macharia",
-                         "email": "test@example.org",
-                         "password_hash": "test_pass",
-                         "confirm_password": "test_pass"}
+        self.user = json.dumps(dict(fullnames="Daisy Macharia",
+                               email="test@example.org",
+                               password="test_pass",
+                               confirm_password="test_pass"))
 
-        # Register user
-        self.client.post("/api/v1.0/auth/register", data=json.dumps
-                         (self.new_user), content_type="application/json")
-
-        # login user
-        response = self.client.post("/api/v1.0/auth/login", data=json.dumps
-                                    ({"email": "test@example.org",
-                                      "password_hash": "test_pass"}),
-                                    content_type="application/json")
-
+        self.login = dict(email="test@example.org",
+                          password="test_pass")
         self.new_bucketlist = {'name': 'Go bunjee jumping'}
-        self.new_bucketlistitem = {'name': 'Go bunjee jumping'}
+        # Register user
+        self.client.post("/api/v1.0/auth/register",
+                         data=self.user,
+                         content_type="application/json")
+        response = self.client.post("/api/v1.0/auth/login",
+                                    data=json.dumps(self.login),
+                                    content_type="application/json")
+        result = json.loads(response.data.decode())
+        token = result['token']
+        self.headers = {'Authorization': "Bearer " + token,
+                        'Content-Type': 'application/json'}
 
     def tearDown(self):
         """teardown all initialized variables."""
@@ -53,7 +55,3 @@ class BaseTest(unittest.TestCase):
             # drop all tables
             db.session.remove()
             db.drop_all()
-
-
-if __name__ == "__main__":
-    unittest.main()

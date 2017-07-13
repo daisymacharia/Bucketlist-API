@@ -67,10 +67,10 @@ class User(db.Model, AddUpdateDelete):
         """Verify password"""
         return pwd_context.verify(password, self.password)
 
-    def generate_auth_token(self, expiration=600):
+    def generate_auth_token(self, expiration=6000):
         # token default expiry time = 10 min
         s = Serializer(secret, expires_in=expiration)
-        return s.dumps({'user_id': self.user_id})
+        return s.dumps({'id': self.user_id})
 
     @staticmethod
     def verify_auth_token(token):
@@ -82,7 +82,7 @@ class User(db.Model, AddUpdateDelete):
             return 'Signature Expired. Try log in again'
         except BadSignature:
             return 'Invalid Token. Try log in again'  # invalid token
-        user = User.query.get(data['user_id'])
+        user = User.query.get(data['id'])
         return user
 
 
@@ -112,7 +112,6 @@ class BucketList(db.Model, AddUpdateDelete):
     created_by = db.Column(db.Integer, db.ForeignKey("users.user_id"))
     name = db.Column(db.String(50), nullable=False)
     items = db.relationship('BucketListItems', backref=db.backref("items"),
-                            order_by='BucketList.list_id',
                             cascade='all, delete-orphan', lazy='dynamic',
                             viewonly=True)
     date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
@@ -122,3 +121,7 @@ class BucketList(db.Model, AddUpdateDelete):
     def __init__(self, name, created_by):
         self.name = name
         self.created_by = created_by
+
+    @staticmethod
+    def get_all():
+        return BucketList.query.all()
