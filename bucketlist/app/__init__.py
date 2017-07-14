@@ -3,6 +3,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_sqlalchemy import SQLAlchemy
 from flasgger import Swagger
+from flask import url_for, redirect
 
 import os.path
 import sys
@@ -30,6 +31,11 @@ def create_app(config_name):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
     db.init_app(app)
+
+    @app.route("/")
+    def index():
+        url = url_for("flasgger.apidocs")
+        return redirect(url, code=302)
 
     api = Api(app)
     api.add_resource(UserRegister, '/api/v1.0/auth/register',
