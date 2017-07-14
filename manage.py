@@ -13,7 +13,7 @@ manager.add_command('db', MigrateCommand)
 
 
 @manager.command
-def initdb():
+def dbinit():
         db.create_all()
         print('All tables created.')
 
