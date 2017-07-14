@@ -16,24 +16,30 @@ class InitialTests(BaseTest):
         self.assertIn("Bucketlist 1 created successfully",
                       str(res.data))
 
-    def test_create_existing_bucketlists(self):
+    def test_cannot_create_existing_bucketlists(self):
         """Test cannot create a bucketlist that already exists"""
         self.bucketlist()
         res1 = self.bucketlist()
         self.assertIn("Bucketlist already created",
                       str(res1.data))
 
-    def test_create_bucketlist_with_empty_values(self):
+    def test_cannot_create_bucketlist_with_empty_values(self):
         res = self.client.post("/api/v1.0/bucketlists/",
                                data=json.dumps({"name": " "}),
                                headers=self.headers)
         self.assertIn("Shorter than minimum length 3", str(res.data))
 
-    def test_create_bucketlist_with_no_name(self):
+    def test_cannot_create_bucketlist_with_no_name(self):
         res = self.client.post("/api/v1.0/bucketlists/",
                                data=json.dumps({}),
                                headers=self.headers)
         self.assertIn("Enter bucketlist name", str(res.data))
+
+    def test_cannot_create_bucketlist_with_special_characters_name(self):
+        res = self.client.post("/api/v1.0/bucketlists/",
+                               data=json.dumps({"name": "test@&"}),
+                               headers=self.headers)
+        self.assertIn("Invalid characters", str(res.data))
 
     def test_get_all_bucketlists(self):
         """Test can get all the bucketlists in the database"""
