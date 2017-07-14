@@ -60,3 +60,22 @@ These are the basic steps to install and run the application locally.
  * Run server
 
        $ flask run
+ ## Screenshots
+ * POST method for registering a new user
+![alt text](screenshots/reg.png)
+
+ * POST method to login an existing user, A token is issued that enables the user access to private endpoints
+![alt text](screenshots/login.png)
+ 
+ * POST method for creation of a new bucketlist
+![alt text](screenshots/create_bucketlist.png)
+
+* GET method to get bucketlist by id
+![alt text](screenshots/get_bucketlist.png)
+
+ * POST method for update of a bucketlist item
+ ![alt text](screenshots/update_items.png)
+ 
+ * GET method to get updated bucketlist item
+  ![alt text](screenshots/get_updated_items.png)
+
