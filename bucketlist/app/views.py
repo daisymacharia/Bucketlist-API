@@ -48,18 +48,34 @@ class UserRegister(Resource):
     ---
     tags:
       - User API
+    responses:
+      200:
+        description: User added successfully
     parameters:
       - in: body
         name: Registration Details
         type: string
         required: true
-        description: {"fullnames": "Daisy Macharia",
-                      "email": "daisy@example.com",
-                      "password": "password",
-                      "confirm_password": "password"}
-    responses:
-      200:
-        description: User added successfully
+        description: Enter fullnames, email, password, confirm_password
+        schema:
+           id: RegisterUser
+           properties:
+            fullnames:
+              type: string
+              default: Daisy Macharia
+              required: true
+            email:
+              type: string
+              default: daisy@example.com
+              required: true
+            password:
+              type: string
+              default: password
+              required: true
+            confirm_password:
+              type: string
+              default: password
+              required: true
     """
 
         data = request.get_json()
@@ -105,14 +121,22 @@ class UserLogin(Resource):
         name: Login Details
         type: string
         required: true
-        description: {
-                      "email": "daisy@example.com",
-                      "password": "password"}
+        description: Enter email, password
+        schema:
+           properties:
+            email:
+              type: string
+              default: daisy@example.com
+              required: true
+            password:
+              type: string
+              default: password
+              required: true
     """
 
         data = request.get_json()
         if not data:
-            response = jsonify({'Error': 'No data provided for login_user'})
+            response = jsonify({'Error': 'No data provided for login'})
             return make_response(response, 400)
         user_login_schema = UserLoginSchema()
         # validate data fetched
@@ -154,13 +178,12 @@ class CreateBucketlist(AuthResource):
             name: Bucketlist Details
             type: string
             required: true
-            description: {
-                          "name": "Go bunjee jumping"}
+            description: Enter bucketlist name
           - in: header
             name: Authorization
             type: string
             required: true
-            description: Bearer token
+            description: Enter token
         """
         data = request.get_json()
         bucketlist_create = BucketListSchema()
@@ -273,8 +296,7 @@ class CreateBucketlist(AuthResource):
             name: Bucketlist Details
             type: string
             required: true
-            description: {"name": "Go bunjee jumping from a mountain"}
-
+            description: Enter new bucketlist name
         """
         bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
             created_by=g.user.user_id).first()
@@ -339,19 +361,17 @@ class BucketlistItems(AuthResource):
 
     def post(self, id):
         """
-           Bucketlist item creation api
-           POST method for creation of a new bucketlist item
-           ---
-           tags:
+            Bucketlist item creation api
+            POST method for creation of a new bucketlist item
+            ---
+            tags:
              - Bucketlist items API
-           parameters:
+            parameters:
              - in: body
                name: Bucketlist item Details
                type: string
                required: true
-               description: {
-                             "name": "Bunjee",
-                             "done": "False"}
+               description: Enter bucketlist item details
              - in: header
                name: Authorization
                type: string
@@ -387,28 +407,28 @@ class BucketlistItems(AuthResource):
 
     def put(self, id, item_id):
         """
-           Bucketlist item update api
-           PUT method for updating an bucketlist item
-           ---
-           tags:
-             - Bucketlist items API
-           parameters:
-             - in: header
-               name: Authorization
-               type: string
-               required: true
-               description: Enter token
-             - in: path
-               name: id
-               type: integer
-             - in: path
-               name: item_id
-               type: integer
-             - in: body
-               name: Bucketlist Details
-               type: string
-               required: true
-               description: {"done": "true"} or  {"name": "name"}
+            Bucketlist item update api
+            PUT method for updating an bucketlist item
+            ---
+            tags:
+              - Bucketlist items API
+            parameters:
+              - in: header
+                name: Authorization
+                type: string
+                required: true
+                description: Enter token
+              - in: path
+                name: id
+                type: integer
+              - in: path
+                name: item_id
+                type: integer
+              - in: body
+                name: Bucketlist Details
+                type: string
+                required: true
+                description: Enter new bucketlist item data
            """
 
         bucketlist_creator = BucketList.query.filter_by(
