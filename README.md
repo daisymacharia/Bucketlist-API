@@ -16,12 +16,12 @@ POST /auth/login | Logs a user in and generates a unique token
 POST /auth/register | Register a user
 POST /bucketlists/  | Create a new bucket list
 GET /bucketlists/ | List all the created bucket lists that belongs to the logged in user
-GET /bucketlists/<id>/ | Get single bucket list
-PUT /bucketlists/<id>/ | Updates the specified bucket list
-DELETE /bucketlists/<id>/ | Delete the specified bucket list
-POST /bucketlists/id/items/ | Create a new item in bucket list
-PUT /bucketlists/id/items/<item_id> | Update a bucket list item
-DELETE /bucketlists/id/items/<item_id> | Delete an item in a bucket list
+GET /bucketlists/{d}/ | Get single bucket list
+PUT /bucketlists/{id}/ | Updates the specified bucket list
+DELETE /bucketlists/{id}/ | Delete the specified bucket list
+POST /bucketlists/{id}/items/ | Create a new item in bucket list
+PUT /bucketlists/{id}/items/{item_id} | Update a bucket list item
+DELETE /bucketlists/{id}/items/{item_id} | Delete an item in a bucket list
 
 ## INSTALLATION
 
@@ -79,3 +79,4 @@ These are the basic steps to install and run the application locally.
  * GET method to get updated bucketlist item
   ![alt text](screenshots/get_updated_items.png)
 
+ * Get the app [here](https://bucketlists-staging.herokuapp.com/apidocs/)
