@@ -107,7 +107,7 @@ class UserLogin(Resource):
 
         data = request.get_json()
         if not data:
-            response = jsonify({'Error': 'No data provided for registration'})
+            response = jsonify({'Error': 'No data provided for login_user'})
             return make_response(response, 400)
         user_login_schema = UserLoginSchema()
         # validate data fetched

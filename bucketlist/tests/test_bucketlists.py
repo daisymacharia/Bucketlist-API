@@ -15,6 +15,7 @@ class InitialTests(BaseTest):
         res = self.bucketlist()
         self.assertIn("Bucketlist 1 created successfully",
                       str(res.data))
+        self.assertEqual(res.status_code, 201)
 
     def test_cannot_create_existing_bucketlists(self):
         """Test cannot create a bucketlist that already exists"""
@@ -22,6 +23,7 @@ class InitialTests(BaseTest):
         res1 = self.bucketlist()
         self.assertIn("Bucketlist already created",
                       str(res1.data))
+        self.assertEqual(res1.status_code, 409)
 
     def test_cannot_create_bucketlist_with_empty_values(self):
         res = self.client.post("/api/v1.0/bucketlists/",
@@ -47,6 +49,7 @@ class InitialTests(BaseTest):
         result = self.client.get('/api/v1.0/bucketlists/',
                                  headers=self.headers)
         self.assertIn('Go bunjee jumping', str(result.data))
+        self.assertEqual(result.status_code, 200)
 
     def test_get_bucketlists_by_id(self):
         """Test can get bucketlists using their id"""
@@ -54,6 +57,7 @@ class InitialTests(BaseTest):
         result = self.client.get('/api/v1.0/bucketlists/1/',
                                  headers=self.headers)
         self.assertIn('Go bunjee jumping', str(result.data))
+        self.assertEqual(result.status_code, 200)
 
     def test_get_bucketlists_that_dont_exist(self):
         """Test cannot get a non existent bucketlist"""
@@ -61,6 +65,7 @@ class InitialTests(BaseTest):
         result = self.client.get('/api/v1.0/bucketlists/9/',
                                  headers=self.headers)
         self.assertIn('The bucketlist does not exist', str(result.data))
+        self.assertEqual(result.status_code, 404)
 
     def test_update_bucketlists(self):
         """Test can update a bucketlists details"""
@@ -72,6 +77,7 @@ class InitialTests(BaseTest):
         result = self.client.get('/api/v1.0/bucketlists/1/',
                                  headers=self.headers)
         self.assertIn("Jump from a plane", str(result.data))
+        self.assertEqual(result.status_code, 200)
 
     def test_update_non_existent_bucketlists(self):
         """Test cannot update a non existent bucketlist"""
@@ -80,6 +86,7 @@ class InitialTests(BaseTest):
                                  data=json.dumps({"name": "Jump from a plane"}),
                                  headers=self.headers)
         self.assertIn("The bucketlist does not exist", str(result.data))
+        self.assertEqual(result.status_code, 404)
 
     def test_update_bucketlist_with_same_name(self):
         """Test cannot update a bucketlist with same data"""
@@ -88,6 +95,7 @@ class InitialTests(BaseTest):
                                  data=json.dumps({"name": "Go bunjee jumping"}),
                                  headers=self.headers)
         self.assertIn("Updating with same data not allowed", str(result.data))
+        self.assertEqual(result.status_code, 409)
 
     def test_delete__bucketlists(self):
         """Test that a bucketlist can be deleted"""
@@ -102,6 +110,7 @@ class InitialTests(BaseTest):
         result = self.client.delete('/api/v1.0/bucketlists/9/',
                                     headers=self.headers)
         self.assertIn('The bucketlist does not exist', str(result.data))
+        self.assertEqual(result.status_code, 404)
 
     def test_search_bucketlist_using_name(self):
         """ Test that a bucketlist can be searched using
@@ -110,6 +119,7 @@ class InitialTests(BaseTest):
         result = self.client.get('/api/v1.0/bucketlists/?q=Jumping',
                                  headers=self.headers)
         self.assertIn('Go bunjee jumping', str(result.data))
+        self.assertEqual(result.status_code, 200)
 
     def test_pagination(self):
         """ Test that output from get method can be paginated """
@@ -117,6 +127,7 @@ class InitialTests(BaseTest):
         result = self.client.get('/api/v1.0/bucketlists/?limit=1',
                                  headers=self.headers)
         self.assertIn('"total_pages": 1', str(result.data))
+        self.assertEqual(result.status_code, 200)
 
 
 if __name__ == "__main__":

@@ -32,6 +32,7 @@ class InitialTests(BaseTest):
         """Test that a bucketlist item is created successfully"""
         res = self.bucketlistitem()
         self.assertIn("Item Test item created successfully", str(res.data))
+        self.assertEqual(res.status_code, 201)
 
     def test_create_existing_bucketlists_item(self):
         """Tests that items cannot be created with same name
@@ -39,13 +40,13 @@ class InitialTests(BaseTest):
         self.bucketlistitem()
         result = self.bucketlistitem()
         self.assertIn("Item already created", str(result.data))
+        self.assertEqual(result.status_code, 409)
 
     def test_create_items_with_empty_values(self):
         res = self.client.post("/api/v1.0/bucketlists/1/items/",
                                data=json.dumps({"name": " "}),
                                headers=self.headers)
         self.assertIn("Shorter than minimum length 3", str(res.data))
-        # self.assertEqual(res.status_code, 400)
 
     def test_update_bucketlist_with_same_name(self):
         """Test cannot update a bucketlist with same data"""
@@ -54,6 +55,7 @@ class InitialTests(BaseTest):
                                  data=json.dumps({"name": "Test item"}),
                                  headers=self.headers)
         self.assertIn("Updating with same data not allowed", str(result.data))
+        self.assertEqual(result.status_code, 409)
 
     def test_update_bucketlists_item(self):
         self.bucketlistitem()
@@ -83,19 +85,17 @@ class InitialTests(BaseTest):
 
     def test_delete_bucketlists_items(self):
         self.bucketlistitem()
-        result = self.client.get("/api/v1.0/bucketlists/1/items/",
-                                 headers=self.headers)
-        self.assertIn("Test item",
-                      str(result.data))
         result = self.client.delete("/api/v1.0/bucketlists/1/items/1",
                                     headers=self.headers)
         self.assertIn("Successfully deleted bucketlist item Test item",
                       str(result.data))
+        self.assertEqual(result.status_code, 200)
 
     def test_delete_non_existent_bucketlists_items(self):
         result = self.client.delete("/api/v1.0/bucketlists/1/items/9",
                                     headers=self.headers)
         self.assertIn("Bucketlist not found", str(result.data))
+        self.assertEqual(result.status_code, 404)
 
 
 if __name__ == "__main__":
