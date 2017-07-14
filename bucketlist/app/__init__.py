@@ -29,7 +29,6 @@ def create_app(config_name):
     app.config.from_pyfile('config.py', silent=True)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
-    create_app('development')
     db.init_app(app)
 
     api = Api(app)
