@@ -19,9 +19,9 @@ GET /bucketlists/ | List all the created bucket lists that belongs to the logged
 GET /bucketlists/<id>/ | Get single bucket list
 PUT /bucketlists/<id>/ | Updates the specified bucket list
 DELETE /bucketlists/<id>/ | Delete the specified bucket list
-POST /bucketlists/<id>/items/ | Create a new item in bucket list
-PUT /bucketlists/<id>/items/<item_id> | Update a bucket list item
-DELETE /bucketlists/<id>/items/<item_id> | Delete an item in a bucket list
+POST /bucketlists/id/items/ | Create a new item in bucket list
+PUT /bucketlists/id/items/<item_id> | Update a bucket list item
+DELETE /bucketlists/id/items/<item_id> | Delete an item in a bucket list
 
 ## INSTALLATION
 
