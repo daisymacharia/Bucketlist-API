@@ -53,7 +53,10 @@ class UserRegister(Resource):
         name: Registration Details
         type: string
         required: true
-        description: Enter fullnames, email,password, confirm_password
+        description: {"fullnames": "Daisy Macharia",
+                      "email": "daisy@example.com",
+                      "password": "password",
+                      "confirm_password": "password"}
     responses:
       200:
         description: User added successfully
@@ -102,7 +105,9 @@ class UserLogin(Resource):
         name: Login Details
         type: string
         required: true
-        description: Enter email, password
+        description: {
+                      "email": "daisy@example.com",
+                      "password": "password"}
     """
 
         data = request.get_json()
@@ -149,12 +154,13 @@ class CreateBucketlist(AuthResource):
             name: Bucketlist Details
             type: string
             required: true
-            description: Enter bucketlist name
+            description: {
+                          "name": "Go bunjee jumping"}
           - in: header
             name: Authorization
             type: string
             required: true
-            description: Enter token
+            description: Bearer token
         """
         data = request.get_json()
         bucketlist_create = BucketListSchema()
@@ -267,7 +273,7 @@ class CreateBucketlist(AuthResource):
             name: Bucketlist Details
             type: string
             required: true
-            description: Enter new bucketlist name
+            description: {"name": "Go bunjee jumping from a mountain"}
 
         """
         bucketlist = BucketList.query.filter_by(list_id=id).filter_by(
@@ -343,7 +349,9 @@ class BucketlistItems(AuthResource):
                name: Bucketlist item Details
                type: string
                required: true
-               description: Enter bucketlist item details
+               description: {
+                             "name": "Bunjee",
+                             "done": "False"}
              - in: header
                name: Authorization
                type: string
@@ -400,7 +408,7 @@ class BucketlistItems(AuthResource):
                name: Bucketlist Details
                type: string
                required: true
-               description: Enter new bucketlist item data
+               description: {"done": "true"} or  {"name": "name"}
            """
 
         bucketlist_creator = BucketList.query.filter_by(
