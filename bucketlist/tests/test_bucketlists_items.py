@@ -10,8 +10,6 @@ parent_dir = current_dir[:current_dir.rfind(os.path.sep)]
 
 sys.path.insert(0, parent_dir)
 from tests.setup import BaseTest
-from app import create_app
-from app.models import db
 
 
 class InitialTests(BaseTest):
@@ -65,6 +63,14 @@ class InitialTests(BaseTest):
                                  headers=self.headers)
         self.assertEqual(result.status_code, 200)
 
+    def test_update_non_existent_bucketlists_item(self):
+        self.bucketlistitem()
+        second_bucketlist = {"name": "sky diving"}
+        result = self.client.put("/api/v1.0/bucketlists/1/items/2",
+                                 data=json.dumps(second_bucketlist),
+                                 headers=self.headers)
+        self.assertIn("Item not found", str(result.data))
+    
     def get_bucketlists_items_by_id(self):
         self.bucketlistitem()
         result = self.client.get("/api/v1.0/bucketlists/1/items/1")

@@ -71,7 +71,8 @@ class InitialTests(BaseTest):
         """Test can update a bucketlists details"""
         self.bucketlist()
         result = self.client.put('/api/v1.0/bucketlists/1/',
-                                 data=json.dumps({"name": "Jump from a plane"}),
+                                 data=json.dumps({
+                                     "name": "Jump from a plane"}),
                                  headers=self.headers)
         self.assertEqual(result.status_code, 200)
         result = self.client.get('/api/v1.0/bucketlists/1/',
@@ -83,16 +84,27 @@ class InitialTests(BaseTest):
         """Test cannot update a non existent bucketlist"""
         self.bucketlist()
         result = self.client.put('/api/v1.0/bucketlists/9/',
-                                 data=json.dumps({"name": "Jump from a plane"}),
+                                 data=json.dumps({
+                                     "name": "Jump from a plane"}),
                                  headers=self.headers)
         self.assertIn("The bucketlist does not exist", str(result.data))
         self.assertEqual(result.status_code, 404)
+
+    def test_update_bucketlist_with_unvalidated_data(self):
+        """Test cannot update a bucketlist with unvalidated"""
+        self.bucketlist()
+        result = self.client.put('/api/v1.0/bucketlists/1/',
+                                 data=json.dumps({
+                                     "name": "Go @#%^2"}),
+                                 headers=self.headers)
+        self.assertIn("Invalid characters", str(result.data))
 
     def test_update_bucketlist_with_same_name(self):
         """Test cannot update a bucketlist with same data"""
         self.bucketlist()
         result = self.client.put('/api/v1.0/bucketlists/1/',
-                                 data=json.dumps({"name": "Go bunjee jumping"}),
+                                 data=json.dumps({
+                                     "name": "Go bunjee jumping"}),
                                  headers=self.headers)
         self.assertIn("Updating with same data not allowed", str(result.data))
         self.assertEqual(result.status_code, 409)
