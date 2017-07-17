@@ -56,6 +56,7 @@ class InitialTests(unittest.TestCase):
         """Test that a new user is registered successfully"""
         res = self.register_user()
         self.assertIn('User added successfully', str(res.data))
+        self.assertEqual(res.status_code, 201)
 
     def test_register_existing_user(self):
         """ Test that an already registered user cannot be reregistered"""
@@ -63,6 +64,7 @@ class InitialTests(unittest.TestCase):
         res1 = self.register_user()
         # self.assertEqual(res1.status, 409)
         self.assertIn('Email already in use', str(res1.data))
+        self.assertEqual(res1.status_code, 409)
 
     def test_register_user_with_missing_email(self):
         """Test that register is not successful with missing fields"""
@@ -80,12 +82,14 @@ class InitialTests(unittest.TestCase):
         res1 = self.client.post("/api/v1.0/auth/register", data=json.dumps(
                                 test_blank), content_type="application/json")
         self.assertIn('Passwords do not match', str(res1.data))
+        self.assertEqual(res1.status_code, 400)
 
     def test_login_user(self):
         """ Test a registered user is logged in successfully"""
         self.register_user()
         res1 = self.login_user()
         self.assertIn('Login successful', str(res1.data))
+        self.assertEqual(res1.status_code, 200)
 
     def test_login_wrong_credentials(self):
         """Test that login is unsuccessful with wrong credentials"""
@@ -96,12 +100,24 @@ class InitialTests(unittest.TestCase):
                                 test_wrong_credentials),
                                 content_type="application/json")
         self.assertIn('Wrong password', str(res1.data))
+        self.assertEqual(res1.status_code, 401)
+
+    def test_login_with_no_data(self):
+        """Test that login is unsuccessful with no data"""
+        test_wrong_credentials = {}
+        self.register_user()
+        res1 = self.client.post("/api/v1.0/auth/login", data=json.dumps(
+                                test_wrong_credentials),
+                                content_type="application/json")
+        self.assertIn('No data provided for login', str(res1.data))
+        self.assertEqual(res1.status_code, 400)
 
     def test_login_without_registering_user(self):
         """Test that a non registered user cannot login"""
         res = self.login_user()
         self.assertIn('Email not registered',
                       str(res.data))
+        self.assertEqual(res.status_code, 400)
 
 
 if __name__ == "__main__":
