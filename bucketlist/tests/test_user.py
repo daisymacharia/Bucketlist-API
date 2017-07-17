@@ -102,6 +102,16 @@ class InitialTests(unittest.TestCase):
         self.assertIn('Wrong password', str(res1.data))
         self.assertEqual(res1.status_code, 401)
 
+    def test_login_with_no_data(self):
+        """Test that login is unsuccessful with no data"""
+        test_wrong_credentials = {}
+        self.register_user()
+        res1 = self.client.post("/api/v1.0/auth/login", data=json.dumps(
+                                test_wrong_credentials),
+                                content_type="application/json")
+        self.assertIn('No data provided for login', str(res1.data))
+        self.assertEqual(res1.status_code, 400)
+
     def test_login_without_registering_user(self):
         """Test that a non registered user cannot login"""
         res = self.login_user()

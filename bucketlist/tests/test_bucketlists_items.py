@@ -78,9 +78,24 @@ class InitialTests(BaseTest):
         self.assertEqual(result.status_code, 200)
         self.assertIn("Test item", str(result.data))
 
+    def test_search_bucketlist_items_using_name(self):
+        self.bucketlistitem()
+        result = self.client.get('/api/v1.0/bucketlists/1/items/?q=item',
+                                 headers=self.headers)
+        self.assertIn('Test item', str(result.data))
+        self.assertEqual(result.status_code, 200)
+
+    def test_pagination(self):
+        self.bucketlistitem()
+        result = self.client.get('/api/v1.0/bucketlists/1/items/?limit=1',
+                                 headers=self.headers)
+        self.assertIn('"total_pages": 1', str(result.data))
+        self.assertEqual(result.status_code, 200)
+
     def get_non_existent_bucketlists_items(self):
         result = self.client.get("/api/v1.0/bucketlists/1/items/9",
                                  headers=self.headers)
+        self.assertIn('The bucketlist item does not exist', str(result.data))
         self.assertEqual(result.status_code, 404)
 
     def test_delete_bucketlists_items(self):
@@ -91,10 +106,18 @@ class InitialTests(BaseTest):
                       str(result.data))
         self.assertEqual(result.status_code, 200)
 
-    def test_delete_non_existent_bucketlists_items(self):
-        result = self.client.delete("/api/v1.0/bucketlists/1/items/9",
+    def test_delete_bucketlists_items_from_non_existent_bucketlist(self):
+        self.bucketlistitem()
+        result = self.client.delete("/api/v1.0/bucketlists/2/items/1",
                                     headers=self.headers)
         self.assertIn("Bucketlist not found", str(result.data))
+        self.assertEqual(result.status_code, 404)
+
+    def test_delete_non_existent_bucketlists_items(self):
+        self.bucketlistitem()
+        result = self.client.delete("/api/v1.0/bucketlists/1/items/9",
+                                    headers=self.headers)
+        self.assertIn("The bucketlist item does not exist", str(result.data))
         self.assertEqual(result.status_code, 404)
 
 
